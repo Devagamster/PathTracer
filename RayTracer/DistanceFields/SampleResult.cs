@@ -11,27 +11,20 @@ namespace RayTracer.DistanceFields
     {
         public double Distance { get; set; }
         public Vector Normal { get; set; }
-        public Color Color { get; set; }
+        public Vector Color { get; set; }
         public double Reflectance { get; set; }
+        public double Roughness { get; set; }
         public double Absorbance { get; set; }
+        public bool Source { get; set; }
 
-        public SampleResult(double distance, Vector normal, Color color, double reflectance, double absorbance)
+        public SampleResult()
         {
-            Distance = distance;
-            Normal = normal;
-            Color = color;
-            Reflectance = reflectance;
-            Absorbance = absorbance;
+            Color = Vector.One;
+            Reflectance = 0.5;
+            Roughness = 1;
+            Absorbance = 0.05;
+            Source = false;
         }
-
-        public SampleResult(double distance, Vector normal, Color color, double reflectance)
-            : this(distance, normal, color, reflectance, 0) { }
-
-        public SampleResult(double distance, Vector normal, Color color)
-            : this(distance, normal, color, 0) { }
-
-        public SampleResult(double distance, Vector normal)
-            : this(distance, normal, Color.FromRgb(255, 255, 255)) { }
 
         public static SampleResult Min(SampleResult first, SampleResult second)
         {

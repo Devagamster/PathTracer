@@ -26,29 +26,24 @@ namespace RayTracer.DistanceFields
             return field + translation;
         }
 
-        public static Texture operator+ (DistanceField field, Color color)
+        public static MaterialChange operator* (DistanceField field, MaterialSettings settings)
         {
-            return new Texture(field, color);
+            return new MaterialChange(field, settings);
         }
 
-        public static Texture operator+ (Color color, DistanceField field)
+        public static MaterialChange operator* (MaterialSettings settings, DistanceField field)
         {
-            return field + color;
+            return field * settings;
         }
 
-        public static Texture operator+ (DistanceField field, Func<Vector, Color> getColor)
+        public static Repitition operator* (DistanceField field, Vector distance)
         {
-            return new Texture(field, getColor);
+            return new Repitition(field, distance);
         }
 
-        public static Texture operator+ (Func<Vector, Color> getColor, DistanceField field)
+        public static Repitition operator* (Vector distance, DistanceField field)
         {
-            return field + getColor;
-        }
-
-        public static Reflection operator/ (DistanceField field, double reflectance)
-        {
-            return new Reflection(field, reflectance);
+            return field * distance;
         }
     }
 }

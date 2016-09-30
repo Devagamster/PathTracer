@@ -63,13 +63,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AveragedPixels.cs" />
     <Compile Include="ColoredPoint.cs" />
+    <Compile Include="DistanceFields\MaterialChange.cs" />
+    <Compile Include="DistanceFields\MaterialSettings.cs" />
+    <Compile Include="DistanceFields\Repitition.cs" />
+    <Compile Include="ThreadSafeRandom.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DisplayMethod.cs" />
-    <Compile Include="DistanceFields\Reflection.cs" />
     <Compile Include="DistanceFields\SampleResult.cs" />
-    <Compile Include="DistanceFields\Texture.cs" />
-    <Compile Include="QuadTree.cs" />
     <Compile Include="Ray.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="DistanceFields\Translation.cs" />

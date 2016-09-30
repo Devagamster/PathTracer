@@ -20,7 +20,7 @@ namespace RayTracer.DistanceFields
 
         public override SampleResult Sample(Vector pos)
         {
-            return new SampleResult(pos.Dot(Normal) - Offset, Normal);
+            return new SampleResult {Distance = pos.Dot(Normal) - Offset, Normal = Normal };
         }
     }
 }

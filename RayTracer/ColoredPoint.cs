@@ -9,11 +9,11 @@ namespace RayTracer
 {
     public class ColoredPoint
     {
-        public Color Color { get; set; }
+        public Vector Color { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
 
-        public ColoredPoint(Color color, double x, double y)
+        public ColoredPoint(Vector color, double x, double y)
         {
             Color = color;
             X = x;

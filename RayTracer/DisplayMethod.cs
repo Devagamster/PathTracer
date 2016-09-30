@@ -9,7 +9,8 @@ namespace RayTracer
 {
     public abstract class DisplayMethod
     {
-        public abstract void DrawPoint(ColoredPoint point, WriteableBitmap bitmap);
+        public abstract void AddPoint(ColoredPoint point);
+        public abstract void DrawPiece(WriteableBitmap bitmap);
         public abstract void Reset(double pixelSize);
     }
 }

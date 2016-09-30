@@ -30,7 +30,7 @@ namespace RayTracer
         public int PointCount { get; set; }
         public List<ColoredPoint>[] Points { get; set; }
         public QuadTree[] Children { get; set; }
-        public Color CurrentColor { get; set; }
+        public Vector CurrentColor { get; set; }
 
         public QuadTree(double pixelSize, double diameter, double centerX, double centerY, List<ColoredPoint> points)
         {
@@ -42,7 +42,7 @@ namespace RayTracer
             if (Diameter <= PixelSize)
             {
                 State = NodeState.Leaf;
-                CurrentColor = Color.FromRgb(0, 0, 0);
+                CurrentColor = Vector.Zero;
             }
             else
             {
@@ -128,15 +128,15 @@ namespace RayTracer
             }
             else if (State == NodeState.Leaf)
             {
-                var r = CurrentColor.R * PointCount;
-                var g = CurrentColor.G * PointCount;
-                var b = CurrentColor.B * PointCount;
+                var r = CurrentColor.X * PointCount;
+                var g = CurrentColor.Y * PointCount;
+                var b = CurrentColor.Z * PointCount;
                 PointCount++;
-                r += p.Color.R;
-                g += p.Color.G;
-                b += p.Color.B;
+                r += p.Color.X;
+                g += p.Color.Y;
+                b += p.Color.Z;
 
-                CurrentColor = Color.FromRgb((byte)(r / PointCount), (byte)(g / PointCount), (byte)(b / PointCount));
+                CurrentColor = new Vector(r / PointCount, g / PointCount, b / PointCount);
             }
             else
             {
@@ -153,12 +153,14 @@ namespace RayTracer
                 var centerXInPixels = CenterX / PixelSize + bitmap.Width / 2;
                 var centerYInPixels = CenterY / PixelSize + bitmap.Height / 2;
 
+                var color = GetColor();
+
                 bitmap.FillRectangle(
                     (int)(centerXInPixels - radiusInPixels),
                     (int)(centerYInPixels - radiusInPixels),
                     (int)(centerXInPixels + radiusInPixels),
                     (int)(centerYInPixels + radiusInPixels),
-                    GetColor());
+                    Color.FromRgb((byte)(color.X * 255.999), (byte)(color.Y * 255.999), (byte)(color.Z * 255.999)));
             }
             else
             {
@@ -169,30 +171,30 @@ namespace RayTracer
             }
         }
 
-        public Color GetColor()
+        public Vector GetColor()
         {
             if (State == NodeState.Sprout)
             {
-                int r = 0;
-                int g = 0;
-                int b = 0;
+                var r = 0.0;
+                var g = 0.0;
+                var b = 0.0;
 
                 foreach (var list in Points)
                 {
                     foreach (var p in list)
                     {
-                        r += p.Color.R;
-                        g += p.Color.G;
-                        b += p.Color.B;
+                        r += p.Color.X;
+                        g += p.Color.Y;
+                        b += p.Color.Z;
                     }
                 }
 
                 if (PointCount == 0)
                 {
-                    return Color.FromRgb(0, 0, 0);
+                    return Vector.Zero;
                 }
 
-                return Color.FromRgb((byte)(r / PointCount), (byte)(g / PointCount), (byte)(b / PointCount));
+                return new Vector(r / PointCount, g / PointCount, b / PointCount);
             }
             else if (State == NodeState.Leaf)
             {

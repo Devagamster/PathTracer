@@ -8,8 +8,6 @@ namespace RayTracer
 {
     public struct Vector
     {
-        static Random rand = new Random();
-
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
@@ -63,6 +61,7 @@ namespace RayTracer
         }
 
         public static Vector Zero = new Vector(0, 0, 0);
+        public static Vector One = new Vector(1, 1, 1);
         
         public static double Distance(Vector a, Vector b)
         {
@@ -79,7 +78,7 @@ namespace RayTracer
 
         public static Vector Random()
         {
-            var vector = new Vector(rand.NextDouble() * 2 - 1, rand.NextDouble() * 2 - 1, rand.NextDouble() * 2 - 1);
+            var vector = new Vector(ThreadSafeRandom.NextDouble() * 2 - 1, ThreadSafeRandom.NextDouble() * 2 - 1, ThreadSafeRandom.NextDouble() * 2 - 1);
             if (vector.Length() > 1)
             {
                 return Random();

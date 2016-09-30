@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Collections.Concurrent;
 
 namespace RayTracer
 {
@@ -15,68 +16,103 @@ namespace RayTracer
     public partial class MainWindow : Window
     {
         WriteableBitmap bitmap;
-        DistanceField field;
         DisplayMethod displayMethod;
+        Thread backgroundThread;
 
-        public static Vector Up = new Vector(0, 1, 0);
-        public static Vector Right = new Vector(1, 0, 0);
-        public static Vector Eye = Vector.Zero;
+        public static Vector Up;
+        public static Vector Forward;
+        public static Vector Right;
+
+        public static Vector WorldUp = new Vector(0, 1, 0);
+        public static Vector Target = new Vector(7, 0, 4);
+        public static Vector Eye = new Vector(-0.75, 1, -1.25);
         public static double FocalLength = 1;
-        public static Random Random = new Random();
+
+        public static Vector Fog = Vector.Zero;
+
+        public static DistanceField Field = 
+            (new Sphere(0.5) * new MaterialSettings { Reflectance = 0.7, Roughness = 0 } * new Vector(2, 0, 2)) +
+            (new Sphere(1) * new MaterialSettings { Source = true, GetColor = _ => new Vector(15, 15, 15) } + new Vector(7, 5, 4)) +
+            (new Plane(WorldUp, -0.5) * new MaterialSettings
+            {
+                GetColor = (Vector pos) =>
+                {
+                    var sum = (int)Math.Floor(pos.X) + (int)Math.Floor(pos.Z);
+                    var white = (sum / 2) * 2 == sum;
+                    if (white)
+                    {
+                        return Vector.One;
+                    }
+                    else
+                    {
+                        return Vector.Zero;
+                    }
+                }
+            });
 
         public MainWindow()
         {
+            Forward = (Target - Eye).Normalize();
+            Right = Forward.Cross(WorldUp).Normalize();
+            Up = Right.Cross(Forward).Normalize();
+
             InitializeComponent();
             UpdateSize();
             CompositionTarget.Rendering += CompositionTarget_Rendering;
-            field = (new Sphere(0.5) + new Vector(0, 0, 2) + Color.FromRgb(255, 0, 0)) / 0.5 + (new Plane(Up, -0.5) + ((Vector pos) => {
-                var sum = (int)pos.X + (int)pos.Z;
-                var white = (sum / 2) * 2 == sum;
-                if (white)
-                {
-                    return Color.FromRgb(255, 255, 255);
-                }
-                else
-                {
-                    return Color.FromRgb(0, 0, 0);
-                }
-            }));
+
+            this.Closed += Stop;
+
+            backgroundThread = new Thread(CalculateRays);
+            backgroundThread.Start();
+        }
+
+        private void Stop(object sender, EventArgs e)
+        {
+            backgroundThread.Abort();
         }
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
-            if ((int)bitmap.Width != (int)Content.ActualWidth * 2 || (int)bitmap.Height != (int)Content.ActualHeight * 2)
+            if ((int)bitmap.Width != (int)Content.ActualWidth || (int)bitmap.Height != (int)Content.ActualHeight)
             {
                 UpdateSize();
             }
 
-            bitmap.Lock();
-            for (var i = 0; i < 1000; i++)
+            var start = DateTime.Now;
+            while ((DateTime.Now - start).Milliseconds < 16)
             {
-                DrawPoint(bitmap, field, Random.NextDouble() - 0.5, Random.NextDouble() - 0.5);
+                displayMethod.DrawPiece(bitmap);
             }
-            bitmap.Unlock();
         }
 
-        private void DrawPoint(WriteableBitmap bitmap, DistanceField field, double x, double y)
+        private void CalculateRays()
         {
-            var pixel = Eye + x * Right + y * Up;
-            var source = Eye + Up.Cross(Right).Normalize() * FocalLength;
-            var ray = new Ray(source, pixel - source);
+            while (true)
+            {
+                Parallel.For(0, 1000, (_) =>
+                {
+                    var x = ThreadSafeRandom.NextDouble() - 0.5;
+                    var y = ThreadSafeRandom.NextDouble() - 0.5;
 
-            var result = ray.March(field, 128, 5, 0.01, 50);
-            
-            displayMethod.DrawPoint(new ColoredPoint(result.Color, x, -y), bitmap);
+                    var pixel = Eye + x * Right + y * Up;
+                    var source = Eye - Forward * FocalLength;
+                    var ray = new Ray(source, pixel - source);
+
+                    var result = ray.March(Field, 0.01, 1000, Fog);
+                    displayMethod.AddPoint(new ColoredPoint(result.Color, x, -y));
+                });
+            }
         }
 
         private void UpdateSize()
         {
-            bitmap = BitmapFactory.New((int)Content.ActualWidth * 2, (int)Content.ActualHeight * 2);
+            bitmap = BitmapFactory.New((int)Content.ActualWidth, (int)Content.ActualHeight);
             ImageContainer.Source = bitmap;
             var pixelSize = 1.0 / Math.Max(bitmap.PixelWidth, bitmap.PixelHeight);
             if (displayMethod == null)
             {
-                displayMethod = new QuadTree(pixelSize, 1, 0, 0, new List<ColoredPoint>());
+                //displayMethod = new QuadTree(pixelSize, 1, 0, 0, new List<ColoredPoint>());
+                displayMethod = new AveragedPixels(1);
             }
             else
             {

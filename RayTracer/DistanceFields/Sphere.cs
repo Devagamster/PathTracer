@@ -17,7 +17,7 @@ namespace RayTracer.DistanceFields
 
         public override SampleResult Sample(Vector pos)
         {
-            return new SampleResult(pos.Length() - Radius, pos.Normalize());
+            return new SampleResult { Distance = pos.Length() - Radius, Normal = pos.Normalize() };
         }
     }
 }

@@ -9,9 +9,9 @@ namespace RayTracer
 {
     public static class Utils
     {
-        public static Color Interpolate(Color a, Color b, double amount)
+        public static Vector Interpolate(Vector a, Vector b, double amount)
         {
-            return Color.Add(Color.Multiply(a, 1 - (float)amount), Color.Multiply(b, (float)amount));
+            return a * (1 - amount) + b * amount;
         }
 
         public static int Interpolate(int a, int b, double amount)
