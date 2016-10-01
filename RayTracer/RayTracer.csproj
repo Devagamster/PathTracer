@@ -65,6 +65,8 @@
     </ApplicationDefinition>
     <Compile Include="AveragedPixels.cs" />
     <Compile Include="ColoredPoint.cs" />
+    <Compile Include="DistanceFields\Intersection.cs" />
+    <Compile Include="DistanceFields\Subtraction.cs" />
     <Compile Include="DistanceFields\MaterialChange.cs" />
     <Compile Include="DistanceFields\MaterialSettings.cs" />
     <Compile Include="DistanceFields\Repitition.cs" />
@@ -119,7 +121,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="DistanceFields\App.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

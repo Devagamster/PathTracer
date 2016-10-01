@@ -24,31 +24,35 @@ namespace RayTracer
         public static Vector Right;
 
         public static Vector WorldUp = new Vector(0, 1, 0);
-        public static Vector Target = new Vector(7, 0, 4);
-        public static Vector Eye = new Vector(-0.75, 1, -1.25);
+        public static Vector Target = new Vector(0, 0, 0);
+        public static Vector Eye = new Vector(0, 0.5, -2);
         public static double FocalLength = 1;
+        public static int OverScan = 2;
 
-        public static Vector Fog = Vector.Zero;
+        public static Vector Fog = Vector.One;
 
-        public static DistanceField Field = 
-            (new Sphere(0.5) * new MaterialSettings { Reflectance = 0.7, Roughness = 0 } * new Vector(2, 0, 2)) +
-            (new Sphere(1) * new MaterialSettings { Source = true, GetColor = _ => new Vector(15, 15, 15) } + new Vector(7, 5, 4)) +
-            (new Plane(WorldUp, -0.5) * new MaterialSettings
+        public static MaterialSettings CheckerBoard = new MaterialSettings
+        {
+            GetColor = (Vector pos) =>
             {
-                GetColor = (Vector pos) =>
+                var sum = (int)Math.Floor(pos.X) + (int)Math.Floor(pos.Z);
+                var white = (sum / 2) * 2 == sum;
+                if (white)
                 {
-                    var sum = (int)Math.Floor(pos.X) + (int)Math.Floor(pos.Z);
-                    var white = (sum / 2) * 2 == sum;
-                    if (white)
-                    {
-                        return Vector.One;
-                    }
-                    else
-                    {
-                        return Vector.Zero;
-                    }
+                    return Vector.One;
                 }
-            });
+                else
+                {
+                    return Vector.Zero;
+                }
+            }
+        };
+
+        public static DistanceField Field =
+            (new Sphere(0.5) * new MaterialSettings { GetColor = _ => new Vector(0, 1, 0), Reflectance = 0.8, Roughness = 0.5 }) + 
+            (new Sphere(0.5) * new MaterialSettings { GetColor = _ => new Vector(1, 0, 0), Reflectance = 0.8, Roughness = 0 } + new Vector(-1, 0, 0)) +
+            (new Sphere(0.5) * new MaterialSettings { GetColor = _ => new Vector(0, 0, 1), Reflectance = 0.8, Roughness = 1 } + new Vector(1, 0, 0)) +
+            (new Plane(WorldUp, -0.5) * CheckerBoard);
 
         public MainWindow()
         {
@@ -73,7 +77,7 @@ namespace RayTracer
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
-            if ((int)bitmap.Width != (int)Content.ActualWidth || (int)bitmap.Height != (int)Content.ActualHeight)
+            if (bitmap.PixelWidth != (int)Content.ActualWidth * OverScan || bitmap.PixelHeight != (int)Content.ActualHeight * OverScan)
             {
                 UpdateSize();
             }
@@ -106,12 +110,11 @@ namespace RayTracer
 
         private void UpdateSize()
         {
-            bitmap = BitmapFactory.New((int)Content.ActualWidth, (int)Content.ActualHeight);
+            bitmap = BitmapFactory.New((int)Content.ActualWidth * OverScan, (int)Content.ActualHeight * OverScan);
             ImageContainer.Source = bitmap;
             var pixelSize = 1.0 / Math.Max(bitmap.PixelWidth, bitmap.PixelHeight);
             if (displayMethod == null)
             {
-                //displayMethod = new QuadTree(pixelSize, 1, 0, 0, new List<ColoredPoint>());
                 displayMethod = new AveragedPixels(1);
             }
             else

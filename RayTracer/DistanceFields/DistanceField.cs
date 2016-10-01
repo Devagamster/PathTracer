@@ -11,9 +11,19 @@ namespace RayTracer.DistanceFields
     {
         public abstract SampleResult Sample(Vector pos);
 
-        public static DistanceField operator+ (DistanceField first, DistanceField second)
+        public static Union operator+ (DistanceField first, DistanceField second)
         {
             return new Union(first, second);
+        }
+
+        public static Subtraction operator- (DistanceField first, DistanceField second)
+        {
+            return new Subtraction(first, second);
+        }
+
+        public static Intersection operator* (DistanceField first, DistanceField second)
+        {
+            return new Intersection(first, second);
         }
 
         public static Translation operator+ (DistanceField field, Vector translation)

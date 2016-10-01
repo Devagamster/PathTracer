@@ -21,7 +21,6 @@ namespace RayTracer
             CurrentPosition = position;
             Direction = direction.Normalize();
             DistanceTraveled = 0;
-            Jumps = 0;
         }
 
         public SampleResult March(DistanceField field, double minimum, double maximum, Vector fog)
@@ -29,7 +28,6 @@ namespace RayTracer
             SampleResult result = field.Sample(CurrentPosition);
             while (true)
             {
-                Jumps++;
                 if (result.Distance < minimum)
                 {
                     break;
@@ -49,33 +47,25 @@ namespace RayTracer
             {
                 bouncedColor = result.Color;
             }
-            else
+            else if (DistanceTraveled < maximum)
             {
-                if (ThreadSafeRandom.NextDouble() > result.Absorbance)
+                Vector target = result.Normal + Vector.Random();
+                // Linearly interpolate between the perfect reflection and the scattered normal.
+                if (ThreadSafeRandom.NextDouble() < result.Reflectance)
                 {
-                    var scatterAmount = Vector.Random() * result.Roughness;
                     var reflectionTarget = Direction - 2 * result.Normal * result.Normal.Dot(Direction);
-                    var scatterTarget = result.Normal;
-                    var bounceTarget = reflectionTarget * (1 - result.Roughness) + scatterTarget * result.Roughness;
-                    var scatteredBounce = bounceTarget + scatterAmount;
-
-                    var target = scatteredBounce;
-
-                    if (ThreadSafeRandom.NextDouble() >= result.Reflectance)
-                    {
-                        target = scatterTarget + Vector.Random();
-                    }
-                    var ray = new Ray(CurrentPosition + result.Normal * minimum * 2, target);
-
-                    var reflectionResult = ray.March(field, minimum, maximum - DistanceTraveled, fog);
-                    var rAmount = Utils.Interpolate(result.Color.X, 1, result.Reflectance);
-                    var gAmount = Utils.Interpolate(result.Color.Y, 1, result.Reflectance);
-                    var bAmount = Utils.Interpolate(result.Color.Z, 1, result.Reflectance);
-                    bouncedColor = new Vector(
-                        reflectionResult.Color.X * rAmount,
-                        reflectionResult.Color.Y * gAmount,
-                        reflectionResult.Color.Z * bAmount);
+                    target = reflectionTarget * (1 - result.Roughness) + target * result.Roughness;
                 }
+                var ray = new Ray(CurrentPosition + result.Normal * minimum * 2, target);
+
+                var reflectionResult = ray.March(field, minimum, maximum - DistanceTraveled, fog);
+                var rAmount = Utils.Interpolate(result.Color.X, 1, result.Reflectance);
+                var gAmount = Utils.Interpolate(result.Color.Y, 1, result.Reflectance);
+                var bAmount = Utils.Interpolate(result.Color.Z, 1, result.Reflectance);
+                bouncedColor = new Vector(
+                    reflectionResult.Color.X * rAmount * (1 - result.Absorbance),
+                    reflectionResult.Color.Y * gAmount * (1 - result.Absorbance),
+                    reflectionResult.Color.Z * bAmount * (1 - result.Absorbance));
             }
 
             var fogAmount = DistanceTraveled / maximum;
