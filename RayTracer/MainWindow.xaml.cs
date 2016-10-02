@@ -22,42 +22,14 @@ namespace RayTracer
         public static Vector Up;
         public static Vector Forward;
         public static Vector Right;
-
-        public static Vector WorldUp = new Vector(0, 1, 0);
-        public static Vector Target = new Vector(0, 0, 0);
-        public static Vector Eye = new Vector(0, 0.5, -2);
         public static double FocalLength = 1;
-        public static int OverScan = 2;
+        public static int OverScan = 1;
 
-        public static Vector Fog = Vector.One;
-
-        public static MaterialSettings CheckerBoard = new MaterialSettings
-        {
-            GetColor = (Vector pos) =>
-            {
-                var sum = (int)Math.Floor(pos.X) + (int)Math.Floor(pos.Z);
-                var white = (sum / 2) * 2 == sum;
-                if (white)
-                {
-                    return Vector.One;
-                }
-                else
-                {
-                    return Vector.Zero;
-                }
-            }
-        };
-
-        public static DistanceField Field =
-            (new Sphere(0.5) * new MaterialSettings { GetColor = _ => new Vector(0, 1, 0), Reflectance = 0.8, Roughness = 0.5 }) + 
-            (new Sphere(0.5) * new MaterialSettings { GetColor = _ => new Vector(1, 0, 0), Reflectance = 0.8, Roughness = 0 } + new Vector(-1, 0, 0)) +
-            (new Sphere(0.5) * new MaterialSettings { GetColor = _ => new Vector(0, 0, 1), Reflectance = 0.8, Roughness = 1 } + new Vector(1, 0, 0)) +
-            (new Plane(WorldUp, -0.5) * CheckerBoard);
 
         public MainWindow()
         {
-            Forward = (Target - Eye).Normalize();
-            Right = Forward.Cross(WorldUp).Normalize();
+            Forward = (Model.Target - Model.Eye).Normalize();
+            Right = Forward.Cross(Model.WorldUp).Normalize();
             Up = Right.Cross(Forward).Normalize();
 
             InitializeComponent();
@@ -98,11 +70,11 @@ namespace RayTracer
                     var x = ThreadSafeRandom.NextDouble() - 0.5;
                     var y = ThreadSafeRandom.NextDouble() - 0.5;
 
-                    var pixel = Eye + x * Right + y * Up;
-                    var source = Eye - Forward * FocalLength;
+                    var pixel = Model.Eye + x * Right + y * Up;
+                    var source = Model.Eye - Forward * FocalLength;
                     var ray = new Ray(source, pixel - source);
 
-                    var result = ray.March(Field, 0.01, 1000, Fog);
+                    var result = ray.March(Model.Field, 0.01, 1000, Model.Fog);
                     displayMethod.AddPoint(new ColoredPoint(result.Color, x, -y));
                 });
             }

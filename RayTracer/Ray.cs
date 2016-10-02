@@ -49,6 +49,7 @@ namespace RayTracer
             }
             else if (DistanceTraveled < maximum)
             {
+                var colorSum = Vector.Zero;
                 Vector target = result.Normal + Vector.Random();
                 // Linearly interpolate between the perfect reflection and the scattered normal.
                 if (ThreadSafeRandom.NextDouble() < result.Reflectance)

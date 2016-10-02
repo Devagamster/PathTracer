@@ -53,7 +53,13 @@ namespace RayTracer
             var pointX = currentX + (pixels.GetLength(0) - bitmap.PixelWidth) / 2;
             var pointY = currentY + (pixels.GetLength(1) - bitmap.PixelHeight) / 2;
             var point = pixels[pointX, pointY];
-            bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(point.Color.X * 255.999), (byte)(point.Color.Y * 255.999), (byte)(point.Color.Z * 255.999)));
+            var r = point.Color.X;
+            if (r > 1) r = 1;
+            var g = point.Color.Y;
+            if (g > 1) g = 1;
+            var b = point.Color.Z;
+            if (b > 1) b = 1;
+            bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(r * 255.999), (byte)(g * 255.999), (byte)(b * 255.999)));
             currentX++;
             if (currentX >= bitmap.PixelWidth)
             {

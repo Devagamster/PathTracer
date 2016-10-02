@@ -70,6 +70,7 @@
     <Compile Include="DistanceFields\MaterialChange.cs" />
     <Compile Include="DistanceFields\MaterialSettings.cs" />
     <Compile Include="DistanceFields\Repitition.cs" />
+    <Compile Include="Model.cs" />
     <Compile Include="ThreadSafeRandom.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DisplayMethod.cs" />
