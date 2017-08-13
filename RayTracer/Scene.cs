@@ -13,7 +13,7 @@ namespace RayTracer
         public static Vector Target = new Vector(0, 0, 0);
         public static Vector Eye = new Vector(0, 2, -4);
 
-        public static Vector Fog = Vector.Zero;
+        public static Vector Fog = Vector.One;
 
         public static MaterialSettings CheckerBoard = new MaterialSettings
         {
@@ -32,7 +32,7 @@ namespace RayTracer
             }
         };
 
-        public static DistanceField Field =
+        public static DistanceField ReflectenceTest = 
             (new Sphere(1) * new MaterialSettings { Source = true, GetColor = _ => new Vector(16, 16, 16)} + new Vector(-3, 3, -3)) +
             (new Sphere(1) * new MaterialSettings { Source = true, GetColor = _ => new Vector(16, 16, 16)} + new Vector(3, 3, -3)) +
             (new Sphere(0.5) * new MaterialSettings { Roughness = 0, Reflectance = 1 } + new Vector(1.5, 0, 0)) +
@@ -51,5 +51,7 @@ namespace RayTracer
             ((new Plane(new Vector(0, 0, 1), -4) + new Plane(new Vector(0, -1, 0), -4)) + 
             (new Sphere(2) * new MaterialSettings { Roughness = 0, Reflectance = 0.5 } + new Vector(0, 0.5, 1))));
 
+        public static DistanceField Field =
+            (new Plane(new Vector(0, 1, 0), -0.5) - new Sphere(2)) * CheckerBoard;
     }
 }

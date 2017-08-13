@@ -55,5 +55,10 @@ namespace RayTracer.DistanceFields
         {
             return field * distance;
         }
+
+        public static Inverse operator! (DistanceField field)
+        {
+            return new Inverse(field);
+        }
     }
 }

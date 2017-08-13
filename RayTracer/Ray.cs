@@ -23,7 +23,7 @@ namespace RayTracer
             DistanceTraveled = 0;
         }
 
-        public SampleResult March(DistanceField field, double minimum, double maximum, Vector fog)
+        public SampleResult March(DistanceField field, double minimum, double maximum, Func<Vector, Vector> fog)
         {
             SampleResult result = field.Sample(CurrentPosition);
             while (true)
@@ -74,7 +74,7 @@ namespace RayTracer
             {
                 fogAmount = 1;
             }
-            result.Color = Utils.Interpolate(bouncedColor, fog, fogAmount);
+            result.Color = Utils.Interpolate(bouncedColor, fog(Direction), fogAmount);
 
             return result;
         }

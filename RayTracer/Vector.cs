@@ -65,6 +65,11 @@ namespace RayTracer
             return v * a;
         }
 
+        public static Vector operator *(Vector a, Vector b)
+        {
+            return new Vector(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
+        }
+
         public static Vector operator /(Vector v, double a)
         {
             return new Vector(v.X / a, v.Y / a, v.Z / a);

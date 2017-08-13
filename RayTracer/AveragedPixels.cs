@@ -53,29 +53,32 @@ namespace RayTracer
         {
             var pointX = currentX + (pixels.GetLength(0) - bitmap.PixelWidth) / 2 + offset;
             var pointY = currentY + (pixels.GetLength(1) - bitmap.PixelHeight) / 2;
-            var point = pixels[pointX, pointY];
-            var r = point.Color.X;
-            if (r > 1) r = 1;
-            var g = point.Color.Y;
-            if (g > 1) g = 1;
-            var b = point.Color.Z;
-            if (b > 1) b = 1;
-            bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(r * 255.999), (byte)(g * 255.999), (byte)(b * 255.999)));
-            currentX+= 1;
-            if (currentX >= bitmap.PixelWidth - offset)
+            if (pointX < pixels.GetLength(0) && pointY < pixels.GetLength(1))
             {
-                currentX = 0;
-                currentY++;
-                if (currentY >= bitmap.PixelHeight)
+                var point = pixels[pointX, pointY];
+                var r = point.Color.X;
+                if (r > 1) r = 1;
+                var g = point.Color.Y;
+                if (g > 1) g = 1;
+                var b = point.Color.Z;
+                if (b > 1) b = 1;
+                bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(r * 255.999), (byte)(g * 255.999), (byte)(b * 255.999)));
+                currentX += 1;
+                if (currentX >= bitmap.PixelWidth - offset)
                 {
-                    currentY = 0;
-                    if (offset == 0)
+                    currentX = 0;
+                    currentY++;
+                    if (currentY >= bitmap.PixelHeight)
                     {
-                        offset = 1;
-                    }
-                    else
-                    {
-                        offset = 0;
+                        currentY = 0;
+                        if (offset == 0)
+                        {
+                            offset = 1;
+                        }
+                        else
+                        {
+                            offset = 0;
+                        }
                     }
                 }
             }

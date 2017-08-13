@@ -63,6 +63,7 @@ namespace RayTracer
 
         private void CalculateRays()
         {
+            var atmosRendering = new AtmosphereRendering(new Vector(0, 1, 1), 1);
             while (true)
             {
                 Parallel.For(0, 250, (_) =>
@@ -74,7 +75,7 @@ namespace RayTracer
                     var source = Scene.Eye - Forward * FocalLength;
                     var ray = new Ray(source, pixel - source);
 
-                    var result = ray.March(Scene.Field, 0.01, 50, Scene.Fog);
+                    var result = ray.March(Scene.Field, 0.01, 50, atmosRendering.CalculateSkyColor);
                     displayMethod.AddPoint(new ColoredPoint(result.Color, x, -y));
                 });
             }

@@ -63,9 +63,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AtmosphereRendering.cs" />
     <Compile Include="AveragedPixels.cs" />
     <Compile Include="ColoredPoint.cs" />
     <Compile Include="DistanceFields\Intersection.cs" />
+    <Compile Include="DistanceFields\Inverse.cs" />
     <Compile Include="DistanceFields\Subtraction.cs" />
     <Compile Include="DistanceFields\MaterialChange.cs" />
     <Compile Include="DistanceFields\MaterialSettings.cs" />
