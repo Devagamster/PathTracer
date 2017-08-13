@@ -28,9 +28,9 @@ namespace RayTracer
 
         public MainWindow()
         {
-            Forward = (Model.Target - Model.Eye).Normalize();
-            Right = Forward.Cross(Model.WorldUp).Normalize();
-            Up = Right.Cross(Forward).Normalize();
+            Forward = (Scene.Target - Scene.Eye).Normalize();
+            Right = Scene.WorldUp.Cross(Forward).Normalize();
+            Up = Forward.Cross(Right).Normalize();
 
             InitializeComponent();
             UpdateSize();
@@ -65,16 +65,16 @@ namespace RayTracer
         {
             while (true)
             {
-                Parallel.For(0, 1000, (_) =>
+                Parallel.For(0, 250, (_) =>
                 {
                     var x = ThreadSafeRandom.NextDouble() - 0.5;
                     var y = ThreadSafeRandom.NextDouble() - 0.5;
 
-                    var pixel = Model.Eye + x * Right + y * Up;
-                    var source = Model.Eye - Forward * FocalLength;
+                    var pixel = Scene.Eye + x * Right + y * Up;
+                    var source = Scene.Eye - Forward * FocalLength;
                     var ray = new Ray(source, pixel - source);
 
-                    var result = ray.March(Model.Field, 0.01, 1000, Model.Fog);
+                    var result = ray.March(Scene.Field, 0.01, 50, Scene.Fog);
                     displayMethod.AddPoint(new ColoredPoint(result.Color, x, -y));
                 });
             }
