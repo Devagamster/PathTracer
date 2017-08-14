@@ -41,13 +41,8 @@ namespace RayTracer
                 DistanceTraveled += result.Distance;
                 result = field.Sample(CurrentPosition);
             }
-
-            var bouncedColor = Vector.Zero;
-            if (result.Source)
-            {
-                bouncedColor = result.Color;
-            }
-            else if (DistanceTraveled < maximum)
+            
+            if (DistanceTraveled < maximum)
             {
                 var colorSum = Vector.Zero;
                 Vector target = result.Normal + Vector.Random();
@@ -63,18 +58,15 @@ namespace RayTracer
                 var rAmount = Utils.Interpolate(result.Color.X, 1, result.Reflectance);
                 var gAmount = Utils.Interpolate(result.Color.Y, 1, result.Reflectance);
                 var bAmount = Utils.Interpolate(result.Color.Z, 1, result.Reflectance);
-                bouncedColor = new Vector(
+                result.Color = new Vector(
                     reflectionResult.Color.X * rAmount * (1 - result.Absorbance),
                     reflectionResult.Color.Y * gAmount * (1 - result.Absorbance),
                     reflectionResult.Color.Z * bAmount * (1 - result.Absorbance));
             }
-
-            var fogAmount = DistanceTraveled / maximum;
-            if (maximum == 0)
+            else
             {
-                fogAmount = 1;
+                result.Color = escapeColor(Direction, CurrentPosition.Y);
             }
-            result.Color = Utils.Interpolate(bouncedColor, escapeColor(Direction, CurrentPosition.Y), fogAmount);
 
             return result;
         }

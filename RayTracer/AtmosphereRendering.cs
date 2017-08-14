@@ -25,7 +25,6 @@ namespace RayTracer
         }
 
         public Vector SunDirection { get; set; }
-        public double CameraHeight { get; set; }
         public DistanceField Planet { get; set; }
         public DistanceField Atmosphere { get; set; }
         public double ScaleHeightRayleigh { get; set; }
@@ -35,7 +34,7 @@ namespace RayTracer
         const int GatheringSamples = 16;
         public Vector CalculateSkyColor(Vector rayDirection, double cameraHeight)
         {
-            var cameraPosition = new Vector(0, CameraHeight + 1, 0);
+            var cameraPosition = new Vector(0, cameraHeight + PlanetRadius, 0);
             var atmosphereIntersect = AtmosphereIntersection(cameraPosition, rayDirection);
             if (atmosphereIntersect == null)
             {

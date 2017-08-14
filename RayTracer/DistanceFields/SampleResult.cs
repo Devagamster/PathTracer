@@ -15,7 +15,6 @@ namespace RayTracer.DistanceFields
         public double Reflectance { get; set; }
         public double Roughness { get; set; }
         public double Absorbance { get; set; }
-        public bool Source { get; set; }
 
         public SampleResult()
         {
@@ -23,7 +22,6 @@ namespace RayTracer.DistanceFields
             Reflectance = 0.5;
             Roughness = 1;
             Absorbance = 0.05;
-            Source = false;
         }
 
         public static SampleResult Min(SampleResult first, SampleResult second)

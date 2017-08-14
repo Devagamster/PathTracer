@@ -23,7 +23,6 @@ namespace RayTracer.DistanceFields
             result.Roughness = MaterialSettings.Roughness;
             result.Color = MaterialSettings.GetColor(pos);
             result.Reflectance = MaterialSettings.Reflectance;
-            result.Source = MaterialSettings.Source;
             result.Absorbance = MaterialSettings.Absorbance;
             return result;
         }
