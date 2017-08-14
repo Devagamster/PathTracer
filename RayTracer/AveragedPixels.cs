@@ -49,6 +49,8 @@ namespace RayTracer
         int currentX = 0;
         int currentY = 0;
         int offset = 0;
+        double previousBrightest = 0;
+        double currentBrightest = 0;
         public override void DrawPiece(WriteableBitmap bitmap)
         {
             var pointX = currentX + (pixels.GetLength(0) - bitmap.PixelWidth) / 2 + offset;
@@ -56,12 +58,14 @@ namespace RayTracer
             if (pointX < pixels.GetLength(0) && pointY < pixels.GetLength(1))
             {
                 var point = pixels[pointX, pointY];
-                var r = point.Color.X;
-                if (r > 1) r = 1;
-                var g = point.Color.Y;
-                if (g > 1) g = 1;
-                var b = point.Color.Z;
-                if (b > 1) b = 1;
+                var brightness = point.Color.Length();
+                if (currentBrightest < brightness)
+                {
+                    currentBrightest = brightness;
+                }
+                var r = point.Color.X / previousBrightest;
+                var g = point.Color.Y / previousBrightest;
+                var b = point.Color.Z / previousBrightest;
                 bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(r * 255.999), (byte)(g * 255.999), (byte)(b * 255.999)));
                 currentX += 1;
                 if (currentX >= bitmap.PixelWidth - offset)
@@ -70,6 +74,8 @@ namespace RayTracer
                     currentY++;
                     if (currentY >= bitmap.PixelHeight)
                     {
+                        previousBrightest = currentBrightest;
+                        currentBrightest = 0;
                         currentY = 0;
                         if (offset == 0)
                         {

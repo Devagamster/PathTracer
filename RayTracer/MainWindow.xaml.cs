@@ -63,7 +63,7 @@ namespace RayTracer
 
         private void CalculateRays()
         {
-            var atmosRendering = new AtmosphereRendering(new Vector(0, 1, 1), 1);
+            var atmosRendering = new AtmosphereRendering(new Vector(0, 1, 0).Normalize());
             while (true)
             {
                 Parallel.For(0, 250, (_) =>

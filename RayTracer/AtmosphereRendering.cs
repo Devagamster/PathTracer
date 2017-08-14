@@ -11,14 +11,12 @@ namespace RayTracer
     {
         public AtmosphereRendering(
             Vector sunDirection, 
-            double cameraHeight, 
             double planetRadius = 6360e3, 
             double atmosphereRadius = 6420e3,
             double scaleHeightRayleigh = 7994,
             double scaleHeightMei = 1200)
         {
             SunDirection = sunDirection;
-            CameraHeight = cameraHeight + planetRadius;
             Planet = new Sphere(planetRadius);
             Atmosphere = !(new Sphere(atmosphereRadius));
             ScaleHeightRayleigh = scaleHeightRayleigh;
@@ -35,9 +33,9 @@ namespace RayTracer
         public double PlanetRadius { get; set; }
 
         const int GatheringSamples = 16;
-        public Vector CalculateSkyColor(Vector rayDirection)
+        public Vector CalculateSkyColor(Vector rayDirection, double cameraHeight)
         {
-            var cameraPosition = new Vector(0, CameraHeight, 0);
+            var cameraPosition = new Vector(0, CameraHeight + 1, 0);
             var atmosphereIntersect = AtmosphereIntersection(cameraPosition, rayDirection);
             if (atmosphereIntersect == null)
             {
@@ -67,7 +65,7 @@ namespace RayTracer
             return sum;
         }
 
-        const double SunIntensity = 2000;
+        const double SunIntensity = 20;
         public Vector LightScatteringAlongDirection(
             Vector viewDir, Vector X,
             Func<double, Vector> scatteringAtHeight,
