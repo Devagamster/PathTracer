@@ -23,5 +23,12 @@ namespace RayTracer
         {
             return a * (1 - amount) + b * amount;
         }
+
+        public static double Clamp(double x, double min, double max)
+        {
+            if (x < min) return min;
+            if (x > max) return max;
+            return x;
+        }
     }
 }

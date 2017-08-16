@@ -18,26 +18,23 @@ namespace RayTracer
             double sunIntensity = 20)
         {
             SunDirection = sunDirection;
-            Planet = new Sphere(planetRadius);
-            Atmosphere = !(new Sphere(atmosphereRadius));
             ScaleHeightRayleigh = scaleHeightRayleigh;
             ScaleHeightMei = scaleHeightMei;
             PlanetRadius = planetRadius;
+            AtmosphereRadius = atmosphereRadius;
             SunIntensity = sunIntensity;
         }
 
         public Vector SunDirection { get; set; }
-        public DistanceField Planet { get; set; }
-        public DistanceField Atmosphere { get; set; }
         public double ScaleHeightRayleigh { get; set; }
         public double ScaleHeightMei { get; set; }
         public double PlanetRadius { get; set; }
+        public double AtmosphereRadius { get; set; }
         public double SunIntensity { get; set; }
-
-        const int GatheringSamples = 4;
+        
         public Vector CalculateSkyColor(Vector rayDirection, double cameraHeight)
         {
-            var cameraPosition = new Vector(0, cameraHeight + PlanetRadius + 3000, 0);
+            var cameraPosition = new Vector(0, cameraHeight + PlanetRadius + 1, 0);
             var viewIntersect = AtmosphereIntersection(cameraPosition, rayDirection);
             var mu = rayDirection.Dot(SunDirection);
             var rayleighPhase = RayleighPhaseFunction(mu);
@@ -46,54 +43,62 @@ namespace RayTracer
             {
                 return Vector.Zero;
             }
-            var a = cameraPosition;
-            var b = viewIntersect.Value;
-            var rayleighSum = Vector.Zero;
-            var meiSum = Vector.Zero;
-            var currentPos = cameraPosition;
-            var diff = b - a;
-            currentPos += rayDirection * diff.Length() / (GatheringSamples * 2);
-            while ((currentPos - a).Length() < diff.Length())
-            {
-                var sunIntersect = AtmosphereIntersection(currentPos, SunDirection);
-                if (sunIntersect != null)
-                {
-                    var atmosphereHeight = currentPos.Length() - PlanetRadius;
-                    var transmittance =
-                        TransmittanceFromAToB(a, currentPos) *
-                        TransmittanceFromAToB(currentPos, sunIntersect.Value);
-                    rayleighSum +=
-                        transmittance *
-                        RayleighExtinctionCoefficients(atmosphereHeight);
-                    meiSum +=
-                        transmittance *
-                        MeiExtinctionCoefficients(atmosphereHeight);
-                    currentPos += rayDirection * diff.Length() / GatheringSamples;
-                }
-            }
-
-            return SunIntensity * (rayleighPhase * rayleighSum * 0 + meiPhase * meiSum);
+            var rayleighColor =
+                SunIntensity *
+                rayleighPhase *
+                NumericalIntegration(cameraPosition, viewIntersect.Value, 4,
+                    (pos) =>
+                    {
+                        var sunIntersect = AtmosphereIntersection(pos, SunDirection);
+                        if (sunIntersect == null)
+                        {
+                            return Vector.Zero;
+                        }
+                        return Transmittance(cameraPosition, pos) *
+                            Transmittance(pos, sunIntersect.Value) *
+                            RayleighExtinctionCoefficients(pos.Y - PlanetRadius);
+                    });
+            var meiColor =
+                SunIntensity *
+                meiPhase *
+                NumericalIntegration(cameraPosition, viewIntersect.Value, 16,
+                    (pos) =>
+                    {
+                        var sunIntersect = AtmosphereIntersection(pos, SunDirection);
+                        if (sunIntersect == null)
+                        {
+                            return Vector.Zero;
+                        }
+                        return Transmittance(cameraPosition, pos) *
+                        Transmittance(pos, sunIntersect.Value) *
+                        MeiScatteringCoefficients(pos.Y - PlanetRadius);
+                    });
+            return meiColor;
         }
 
-        const int NumberOfTransmittanceSamples = 4;
-        public Vector TransmittanceFromAToB(Vector a, Vector b)
+        public Vector Transmittance(Vector a, Vector b)
         {
-            var sum = Vector.Zero;
+            var result = -NumericalIntegration(a, b, 4,
+                (pos) => RayleighExtinctionCoefficients(pos.Y - PlanetRadius));
+            return new Vector(Math.Exp(-result.X), Math.Exp(-result.Y), Math.Exp(-result.Z));
+        }
+
+        public Vector NumericalIntegration(Vector a, Vector b, int sampleCount, Func<Vector, Vector> body)
+        {
             var currentPos = a;
-            var diff = a - b;
+            var diff = b - a;
             var dir = diff.Normalize();
-            currentPos += dir * diff.Length() / (NumberOfTransmittanceSamples * 2);
-            while ((currentPos - a).Length() < diff.Length())
+            var totalDistance = diff.Length();
+            var sampleDistance = totalDistance / sampleCount;   
+            var sampleDelta = dir * sampleDistance;
+            currentPos += sampleDelta / 2;
+            var sum = Vector.Zero;
+            for (int i = 0; i < sampleCount; i++)
             {
-                var atmosphereHeight = currentPos.Length() - PlanetRadius;
-                sum += (MeiExtinctionCoefficients(atmosphereHeight) + RayleighExtinctionCoefficients(atmosphereHeight)) * diff.Length() / NumberOfTransmittanceSamples;
-                currentPos += dir * diff.Length() / NumberOfTransmittanceSamples;
+                sum += body(currentPos) * sampleDistance;
+                currentPos += sampleDelta;
             }
-            return new Vector(
-                Math.Exp(-sum.X),
-                Math.Exp(-sum.Y),
-                Math.Exp(-sum.Z)
-            );
+            return sum;
         }
 
         public Vector RayleighExtinctionCoefficientsAtSeaLevel = new Vector(
@@ -136,19 +141,40 @@ namespace RayTracer
 
         public Vector? AtmosphereIntersection(Vector pos, Vector dir)
         {
-            var field = Planet + Atmosphere;
-            while (true)
+            var intersection = RaySphereIntersection(pos, dir, PlanetRadius);
+            if (intersection == null)
             {
-                var sample = field.Sample(pos);
-                if (sample.Distance < 100)
-                {
-                    return pos;
-                }
-
-                var amount = sample.Distance;
-                if (amount < 100) amount = 100;
-                pos += amount * dir;
+                intersection = RaySphereIntersection(pos, dir, AtmosphereRadius);
             }
+            return intersection;
+        }
+
+        public Vector? RaySphereIntersection(Vector origin, Vector dir, double radius)
+        {
+            var a = dir.Dot(dir);
+            var b = 2 * dir.Dot(origin);
+            var c = origin.Dot(origin) - radius * radius;
+
+            var desc = b * b - 4 * a * c;
+            if (desc < 0)
+            {
+                return null;
+            }
+
+            var t1 = (-b + Math.Sqrt(desc)) / (2 * a);
+            var t2 = (-b - Math.Sqrt(desc)) / (2 * a);
+
+            if (t1 > t2)
+            {
+                var temp = t1;
+                t1 = t2;
+                t2 = temp;
+            }
+            var t = t1;
+            if (t < 0) t = t2;
+            if (t < 0) return null;
+
+            return origin + t * dir;
         }
     }
 }

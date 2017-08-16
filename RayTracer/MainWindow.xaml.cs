@@ -34,6 +34,7 @@ namespace RayTracer
 
             InitializeComponent();
             UpdateSize();
+
             CompositionTarget.Rendering += CompositionTarget_Rendering;
 
             this.Closed += Stop;
@@ -79,14 +80,17 @@ namespace RayTracer
             var atmosRendering = new AtmosphereRendering(new Vector(0, 1, 0).Normalize());
             while (true)
             {
+                //*
                 Parallel.For(0, 100, (_) =>
                 {
                     CalculateRay(atmosRendering);
                 });
-                //for (var i = 0; i < 1; i++)
-                //{
-                //    CalculateRay(atmosRendering);
-                //}
+                /*/
+                for (var i = 0; i < 1; i++)
+                {
+                    CalculateRay(atmosRendering);
+                }
+                //*/
             }
         }
 

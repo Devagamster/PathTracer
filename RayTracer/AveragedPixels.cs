@@ -63,9 +63,9 @@ namespace RayTracer
                 {
                     currentBrightest = brightness;
                 }
-                var r = point.Color.X / previousBrightest;
-                var g = point.Color.Y / previousBrightest;
-                var b = point.Color.Z / previousBrightest;
+                var r = point.Color.X < 1.413 ? Math.Pow(point.Color.X * 0.38317, 1.0 / 2.2) : 1.0 - Math.Exp(-point.Color.X);
+                var g = point.Color.Y < 1.413 ? Math.Pow(point.Color.Y * 0.38317, 1.0 / 2.2) : 1.0 - Math.Exp(-point.Color.Y);
+                var b = point.Color.Z < 1.413 ? Math.Pow(point.Color.Z * 0.38317, 1.0 / 2.2) : 1.0 - Math.Exp(-point.Color.Z);
                 bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(r * 255.999), (byte)(g * 255.999), (byte)(b * 255.999)));
                 currentX += 1;
                 if (currentX >= bitmap.PixelWidth - offset)
