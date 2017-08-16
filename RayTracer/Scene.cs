@@ -53,6 +53,6 @@ namespace RayTracer
 
         public static DistanceField Field =
             (new Plane(new Vector(0, 1, 0), 0) - new Sphere(2)) * CheckerBoard +
-            (new Sphere(1) * new MaterialSettings { Roughness = 0.1, Reflectance = 0.9 });
+            (new Sphere(1) * new MaterialSettings { Roughness = 0, Reflectance = 1 });
     }
 }
