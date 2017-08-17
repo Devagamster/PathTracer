@@ -46,11 +46,19 @@ namespace RayTracer
             }
         }
 
+        public Vector ToneMap(Vector x)
+        {
+            var a = 2.51;
+            var b = 0.03;
+            var c = 2.43;
+            var d = 0.59;
+            var e = 0.14;
+            return ((x * (a * x + b)) / (x * (c * x + d) + e)).Saturate();
+        }
+
         int currentX = 0;
         int currentY = 0;
         int offset = 0;
-        double previousBrightest = 0;
-        double currentBrightest = 0;
         public override void DrawPiece(WriteableBitmap bitmap)
         {
             var pointX = currentX + (pixels.GetLength(0) - bitmap.PixelWidth) / 2 + offset;
@@ -58,15 +66,8 @@ namespace RayTracer
             if (pointX < pixels.GetLength(0) && pointY < pixels.GetLength(1))
             {
                 var point = pixels[pointX, pointY];
-                var brightness = point.Color.Length();
-                if (currentBrightest < brightness)
-                {
-                    currentBrightest = brightness;
-                }
-                var r = point.Color.X < 1.413 ? Math.Pow(point.Color.X * 0.38317, 1.0 / 2.2) : 1.0 - Math.Exp(-point.Color.X);
-                var g = point.Color.Y < 1.413 ? Math.Pow(point.Color.Y * 0.38317, 1.0 / 2.2) : 1.0 - Math.Exp(-point.Color.Y);
-                var b = point.Color.Z < 1.413 ? Math.Pow(point.Color.Z * 0.38317, 1.0 / 2.2) : 1.0 - Math.Exp(-point.Color.Z);
-                bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(r * 255.999), (byte)(g * 255.999), (byte)(b * 255.999)));
+                var color = ToneMap(point.Color);
+                bitmap.SetPixel(currentX, currentY, Color.FromRgb((byte)(color.X * 255.999), (byte)(color.Y * 255.999), (byte)(color.Z * 255.999)));
                 currentX += 1;
                 if (currentX >= bitmap.PixelWidth - offset)
                 {
@@ -74,8 +75,6 @@ namespace RayTracer
                     currentY++;
                     if (currentY >= bitmap.PixelHeight)
                     {
-                        previousBrightest = currentBrightest;
-                        currentBrightest = 0;
                         currentY = 0;
                         if (offset == 0)
                         {

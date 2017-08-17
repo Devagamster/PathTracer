@@ -43,43 +43,32 @@ namespace RayTracer
             {
                 return Vector.Zero;
             }
-            var rayleighColor =
-                SunIntensity *
-                rayleighPhase *
-                NumericalIntegration(cameraPosition, viewIntersect.Value, 4,
-                    (pos) =>
+            return NumericalIntegration(cameraPosition, viewIntersect.Value, 16,
+                (pos) =>
+                {
+                    var sunIntersect = AtmosphereIntersection(pos, SunDirection);
+                    if (sunIntersect == null)
                     {
-                        var sunIntersect = AtmosphereIntersection(pos, SunDirection);
-                        if (sunIntersect == null)
-                        {
-                            return Vector.Zero;
-                        }
-                        return Transmittance(cameraPosition, pos) *
-                            Transmittance(pos, sunIntersect.Value) *
-                            RayleighExtinctionCoefficients(pos.Y - PlanetRadius);
-                    });
-            var meiColor =
-                SunIntensity *
-                meiPhase *
-                NumericalIntegration(cameraPosition, viewIntersect.Value, 16,
-                    (pos) =>
-                    {
-                        var sunIntersect = AtmosphereIntersection(pos, SunDirection);
-                        if (sunIntersect == null)
-                        {
-                            return Vector.Zero;
-                        }
-                        return Transmittance(cameraPosition, pos) *
-                        Transmittance(pos, sunIntersect.Value) *
-                        MeiScatteringCoefficients(pos.Y - PlanetRadius);
-                    });
-            return meiColor;
+                        return Vector.Zero;
+                    }
+                    var atmosphereHeight = pos.Length() - PlanetRadius;
+                    var transCameraToPos = Transmittance(cameraPosition, pos);
+                    var transPosToSky = Transmittance(pos, sunIntersect.Value);
+                    var rayExtinction = rayleighPhase * RayleighExtinctionCoefficients(atmosphereHeight);
+                    var meiExtinction = meiPhase * MeiExtinctionCoefficients(atmosphereHeight);
+                    return SunIntensity * transCameraToPos * transPosToSky * (rayExtinction + meiExtinction);
+                });
         }
 
         public Vector Transmittance(Vector a, Vector b)
         {
-            var result = -NumericalIntegration(a, b, 4,
-                (pos) => RayleighExtinctionCoefficients(pos.Y - PlanetRadius));
+            var result = NumericalIntegration(a, b, 16, (pos) =>
+            {
+                var atmosphereDistance = pos.Length() - PlanetRadius;
+                var rayleighExtinction = RayleighExtinctionCoefficients(atmosphereDistance);
+                var meiExtinction = MeiExtinctionCoefficients(atmosphereDistance);
+                return rayleighExtinction + meiExtinction;
+            });
             return new Vector(Math.Exp(-result.X), Math.Exp(-result.Y), Math.Exp(-result.Z));
         }
 
@@ -144,9 +133,9 @@ namespace RayTracer
             var intersection = RaySphereIntersection(pos, dir, PlanetRadius);
             if (intersection == null)
             {
-                intersection = RaySphereIntersection(pos, dir, AtmosphereRadius);
+                return RaySphereIntersection(pos, dir, AtmosphereRadius);
             }
-            return intersection;
+            return null;
         }
 
         public Vector? RaySphereIntersection(Vector origin, Vector dir, double radius)

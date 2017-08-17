@@ -29,7 +29,7 @@ namespace RayTracer
                 {
                     return Vector.Zero;
                 }
-            }
+            }, Roughness = 1, Reflectance = 0.2
         };
 
         public static DistanceField ReflectenceTest = 

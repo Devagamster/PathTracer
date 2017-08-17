@@ -40,6 +40,11 @@ namespace RayTracer
             return new Vector(Y * other.Z - Z * other.Y, Z * other.X - X * other.Z, X * other.Y - Y * other.X);
         }
 
+        public Vector Saturate()
+        {
+            return new Vector(Utils.Clamp(X, 0, 1), Utils.Clamp(Y, 0, 1), Utils.Clamp(Z, 0, 1));
+        }
+
         public static Vector operator + (Vector a, Vector b)
         {
             return new Vector(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
@@ -73,6 +78,31 @@ namespace RayTracer
         public static Vector operator /(Vector v, double a)
         {
             return new Vector(v.X / a, v.Y / a, v.Z / a);
+        }
+
+        public static Vector operator /(Vector a, Vector b)
+        {
+            return new Vector(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
+        }
+
+        public static Vector operator +(Vector v, double a)
+        {
+            return new Vector(v.X + a, v.Y + a, v.Z + a);
+        }
+
+        public static Vector operator +(double a, Vector v)
+        {
+            return new Vector(v.X + a, v.Y + a, v.Z + a);
+        }
+
+        public static Vector operator -(Vector v, double a)
+        {
+            return new Vector(v.X - a, v.Y - a, v.Z - a);
+        }
+
+        public static Vector operator -(double a, Vector v)
+        {
+            return new Vector(a - v.X, a - v.Y, a + v.Z);
         }
 
         public static Vector Zero = new Vector(0, 0, 0);
