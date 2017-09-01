@@ -52,6 +52,7 @@ namespace RayTracer
                         return Vector.Zero;
                     }
                     var atmosphereHeight = pos.Length() - PlanetRadius;
+
                     var transCameraToPos = Transmittance(cameraPosition, pos);
                     var transPosToSky = Transmittance(pos, sunIntersect.Value);
                     var rayExtinction = rayleighPhase * RayleighExtinctionCoefficients(atmosphereHeight);

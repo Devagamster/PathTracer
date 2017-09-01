@@ -77,7 +77,7 @@ namespace RayTracer
 
         private void CalculateRays()
         {
-            var atmosRendering = new AtmosphereRendering(new Vector(1, 0.05, 0).Normalize());
+            var atmosRendering = new AtmosphereRendering(new Vector(0, 0.05, 1).Normalize());
             while (true)
             {
                 //*
