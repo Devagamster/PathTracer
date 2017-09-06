@@ -22,7 +22,7 @@ namespace RayTracer
         public static Vector Up;
         public static Vector Forward;
         public static Vector Right;
-        public static double FocalLength = 1;
+        public static double FocalLength = 0.5;
         public static int OverScan = 1;
 
 
@@ -71,7 +71,7 @@ namespace RayTracer
             var source = Scene.Eye - Forward * FocalLength;
             var ray = new Ray(source, pixel - source);
 
-            var result = ray.March(Scene.Field, 0.01, 50, atmosRendering.CalculateSkyColor);
+            var result = ray.March(Scene.Field, 0.01, 1000, atmosRendering.CalculateSkyColor);
             displayMethod.AddPoint(new ColoredPoint(result.Color, x, -y));
         }
 

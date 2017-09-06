@@ -136,7 +136,7 @@ namespace RayTracer
             {
                 return RaySphereIntersection(pos, dir, AtmosphereRadius);
             }
-            return null;
+            return intersection;
         }
 
         public Vector? RaySphereIntersection(Vector origin, Vector dir, double radius)
