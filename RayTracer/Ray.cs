@@ -23,7 +23,7 @@ namespace RayTracer
             DistanceTraveled = 0;
         }
 
-        public SampleResult March(DistanceField field, double minimum, double maximum, Func<Vector, double, Vector> escapeColor)
+        public SampleResult March(DistanceField field, double minimum, double maximum, Func<Vector, Vector, Vector> escapeColor)
         {
             SampleResult result = field.Sample(CurrentPosition);
             while (true)
@@ -34,7 +34,6 @@ namespace RayTracer
                 }
                 if (DistanceTraveled > maximum)
                 {
-                    DistanceTraveled = maximum;
                     break;
                 }
                 CurrentPosition = CurrentPosition + Direction * result.Distance;
@@ -52,7 +51,7 @@ namespace RayTracer
                     var reflectionTarget = Direction - 2 * result.Normal * result.Normal.Dot(Direction);
                     target = reflectionTarget * (1 - result.Roughness) + target * result.Roughness;
                 }
-                var ray = new Ray(CurrentPosition + result.Normal * minimum * 2, target);
+                var ray = new Ray(CurrentPosition + result.Normal * minimum, target);
 
                 var reflectionResult = ray.March(field, minimum, maximum - DistanceTraveled, escapeColor);
                 var rAmount = Utils.Interpolate(result.Color.X, 1, result.Reflectance);
@@ -65,7 +64,7 @@ namespace RayTracer
             }
             else
             {
-                result.Color = escapeColor(Direction, CurrentPosition.Y);
+                result.Color = escapeColor(Direction, CurrentPosition);
             }
 
             return result;

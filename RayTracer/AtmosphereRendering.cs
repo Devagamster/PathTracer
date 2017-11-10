@@ -32,9 +32,9 @@ namespace RayTracer
         public double AtmosphereRadius { get; set; }
         public double SunIntensity { get; set; }
         
-        public Vector CalculateSkyColor(Vector rayDirection, double cameraHeight)
+        public Vector CalculateSkyColor(Vector rayDirection, Vector cameraPosition)
         {
-            var cameraPosition = new Vector(0, cameraHeight + PlanetRadius + 1, 0);
+            cameraPosition = new Vector(cameraPosition.X, cameraPosition.Y + PlanetRadius, cameraPosition.Z);
             var viewIntersect = AtmosphereIntersection(cameraPosition, rayDirection);
             var mu = rayDirection.Dot(SunDirection);
             var rayleighPhase = RayleighPhaseFunction(mu);
